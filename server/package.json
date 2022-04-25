@@ -1,0 +1,52 @@
+{
+  "name": "crudynamic",
+  "version": "1.0.0",
+  "description": "This is a Restful api node.js server, it will hold all the needed routes for the admin's dashboard and public APIs for third party integration",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "nodemon server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "_moduleAliases": {
+    "@helpers": "helpers",
+    "@controllers": "controllers",
+    "@models": "models",
+    "@routes": "routes",
+    "@middlewares": "middlewares"
+  },
+  "dependencies": {
+    "@meanie/joi-moment": "^2.5.0",
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-jwt": "^6.0.0",
+    "fs": "0.0.1-security",
+    "joi": "^17.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "module-alias": "^2.2.2",
+    "mongoose": "^5.10.11",
+    "mongoose-autopopulate": "^0.12.3",
+    "multer": "^1.4.3",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0",
+    "passport-local": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OnePack-Inc/dynamicCrud.git"
+  },
+  "keywords": [
+    "node",
+    "express"
+  ],
+  "author": "OnePack",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OnePack-Inc/dynamicCrud/issues"
+  },
+  "homepage": "https://github.com/OnePack-Inc/dynamicCrud"
+}
