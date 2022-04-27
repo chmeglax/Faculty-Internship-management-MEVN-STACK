@@ -1,21 +1,13 @@
 <template>
   <div class="table-responsive text-nowrap">
     <a-table :columns="columns" :data-source="data">
-      <template
-        #filterDropdown="{
-          setSelectedKeys,
-          selectedKeys,
-          confirm,
-          clearFilters,
-          column,
-        }"
-      >
+      <template #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
         <div class="custom-filter-dropdown">
           <a-input
-            :placeholder="`Search ${column.dataIndex}`"
+            :placeholder="`recherche ${column.dataIndex}`"
             :value="selectedKeys[0]"
             style="width: 188px; margin-bottom: 8px; display: block"
-            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            @change="(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])"
             @pressEnter="() => handleSearch(selectedKeys, confirm)"
           />
           <a-button
@@ -175,7 +167,7 @@ export default {
       searchText.value = selectedKeys[0]
     }
 
-    const handleReset = clearFilters => {
+    const handleReset = (clearFilters) => {
       clearFilters()
       searchText.value = ''
     }

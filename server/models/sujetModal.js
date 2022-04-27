@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { SujetModal } = require('@models')
 
 const { Schema } = mongoose;
 const SujetSchema = new Schema({
@@ -7,9 +6,16 @@ const SujetSchema = new Schema({
     code: { type: String },
     name: { type: String, required: true },
     desc: { type: String, required: true },
+    organisme: {
+        type: String, required: true
+    },
     encadrantS: {
         name: { type: String, required: false },
         job: { type: String, required: false },
+    },
+    type: {
+        type: String,
+        enum: ['PFA', 'PFE']
     },
     validated: {
         type: Boolean,

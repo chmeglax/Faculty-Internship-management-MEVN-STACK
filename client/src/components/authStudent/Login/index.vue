@@ -25,6 +25,10 @@
         </a-button>
       </a-form>
     </div>
+    <div class="text-center pt-2 mb-auto">
+      <span class="mr-2">Vous n'avez pas de compte ?</span>
+      <router-link to="/authstudent/register" class="vb__utils__link"> Sign up </router-link>
+    </div>
   </div>
 </template>
 <script>

@@ -26,8 +26,14 @@ module.exports = {
             } else {
                 console.log("*** Token generation begins ***** ");
                 const payload = {
-                    sub: user.cin,
+                    sub: user.id,
                     email: user.email,
+                    fName: user.fName,
+                    lName: user.lName,
+                    files: user.files,
+                    phone: user.phone,
+                    section: user.section,
+                    student: false
                 };
                 const info = JSON.parse(JSON.stringify(user))
                 delete info.password

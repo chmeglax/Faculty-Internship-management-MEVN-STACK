@@ -1,7 +1,15 @@
 <template>
   <a-dropdown :trigger="['click']" placement="bottomLeft">
     <div :class="$style.dropdown">
-      <a-avatar shape="square" size="large" :class="$style.avatar">
+      <a-avatar
+        v-if="user.avatar"
+        shape="square"
+        size="large"
+        :src="user.avatar"
+        :class="$style.avatar"
+      >
+      </a-avatar>
+      <a-avatar v-else shape="square" size="large" :src="user.avatar" :class="$style.avatar">
         <template #icon><UserOutlined /></template>
       </a-avatar>
     </div>
@@ -15,11 +23,11 @@
             >
           </div>
           <div>
-            <strong class="mr-1">{{ $t('topBar.profileMenu.billingPlan') }}: </strong>
+            <strong class="mr-1">Type : </strong>
             Etudiant
           </div>
           <div>
-            <strong class="mr-1">{{ $t('topBar.profileMenu.role') }}:</strong>
+            <strong class="mr-1">Section :</strong>
             {{ user.section || '—' }}
           </div>
         </a-menu-item>

@@ -24,7 +24,7 @@
                   <div style="padding: 8px">
                     <a-input
                       ref="searchInput"
-                      :placeholder="`Search ${column.dataIndex}`"
+                      :placeholder="`recherche ${column.dataIndex}`"
                       :value="selectedKeys[0]"
                       style="width: 188px; margin-bottom: 8px; display: block"
                       @change="(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])"

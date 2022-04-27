@@ -71,14 +71,17 @@ function deleteFiles(files, callback) {
 exports.create = async function (req, res, next) {
 
   try {
+    console.log(req.body)
     if (!req.body.data) {
       req.body.data = JSON.parse(JSON.stringify(req.body, getCircularReplacer()));
-      req.body.data.files = req.files
+      req.body.data.files = req.files.length == 0 ? undefined : req.files[0].path
       delete req.body.data.validator
       delete req.body.data.modelName
     }
+
     const { data } = req.body;
     const { validator, modelName } = res.locals
+    console.log(data)
     let entityData =
       Object.keys(validator).length != 0
         ? await Joi.object(validator).validateAsync(data)

@@ -6,7 +6,7 @@ import StudenLayout from '@/layouts/Student'
 import store from '@/store'
 
 const router = createRouter({
-  base: process.env.BASE_URL,
+  //base: process.env.BASE_URL,
   scrollBehavior() {
     return { x: 0, y: 0 }
   },
@@ -43,12 +43,12 @@ const router = createRouter({
     },
     {
       path: '/student',
-      name: 'home',
+      name: 'homeS',
       // VB:REPLACE-NEXT-LINE:ROUTER-REDIRECT
       redirect: '/student/organismes',
       component: StudenLayout,
       meta: {
-        authRequired: true,
+        authSRequired: true,
         hidden: true,
       },
       children: [
@@ -61,6 +61,11 @@ const router = createRouter({
           path: '/student/proposition',
           meta: { title: 'proposition' },
           component: () => import('./views/student/proposition'),
+        },
+        {
+          path: '/student/proposition/ajouter',
+          meta: { title: 'Ajouter une proposition' },
+          component: () => import('./views/student/proposition/addProposition'),
         },
         // VB:REPLACE-END:ROUTER-CONFIG
       ],
@@ -182,20 +187,45 @@ router.beforeEach((to, from, next) => {
   setTimeout(() => {
     NProgress.done()
   }, 300)
+  console.log("from", from)
+  console.log("to", to)
+  console.log("authorized", store.state.user.authorized)
+  console.log("authorizedStudent", store.state.user.authorizedStudent)
+  if (to.matched.some(record => record.meta.authSRequired)) {
 
-  if (to.matched.some(record => record.meta.authRequired)) {
-    console.log(to)
-    if (!store.state.user.authorized) {
+    if (!store.state.user.authorizedStudent) {
+      console.log("1")
+
       next({
-        path: '/auth/login',
+        path: '/authstudent/login',
         query: { redirect: to.fullPath },
       })
     } else {
+      console.log("2")
       next()
     }
   } else {
-    next()
+    if (to.matched.some(record => record.meta.authRequired)) {
+
+      if (!store.state.user.authorized) {
+        console.log("3")
+
+        next({
+          path: '/auth/login',
+          query: { redirect: to.fullPath },
+        })
+      } else {
+        console.log("4")
+        next()
+      }
+    } else {
+      console.log("5")
+
+      next()
+    }
+
   }
+
 })
 
 export default router

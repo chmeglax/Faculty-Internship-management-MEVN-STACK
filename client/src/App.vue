@@ -22,7 +22,7 @@ export default {
     const routeTitle = computed(() => route.meta.title)
     const currentRoute = computed(() => route)
     const authorized = computed(() => store.getters['user/user'].authorized)
-
+    const authorizedStudent = computed(() => store.getters['user/user'].authorizedStudent)
     // watch page title change
     watch(
       [logo, routeTitle],
@@ -35,12 +35,23 @@ export default {
     })
 
     // redirect if authorized and current page is login
-    watch(authorized, authorized => {
+    watch(authorized, (authorized) => {
       if (authorized) {
         const query = qs.parse(currentRoute.value.fullPath.split('?')[1], {
           ignoreQueryPrefix: true,
         })
-        router.push(query.redirect || '/')
+        console.log('query : ', query)
+        router.push(query.redirect || '/admin')
+      }
+    })
+    watch(authorizedStudent, (authorized) => {
+      if (authorized) {
+        console.log(currentRoute.value.fullPath)
+        const query = qs.parse(currentRoute.value.fullPath.split('?')[1], {
+          ignoreQueryPrefix: true,
+        })
+
+        router.push(query.redirect || '/student')
       }
     })
   },

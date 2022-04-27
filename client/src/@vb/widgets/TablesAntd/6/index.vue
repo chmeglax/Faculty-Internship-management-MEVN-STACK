@@ -1,22 +1,14 @@
 <template>
   <div class="table-responsive text-nowrap">
     <a-table :data-source="data" :columns="columns">
-      <template
-        #filterDropdown="{
-          setSelectedKeys,
-          selectedKeys,
-          confirm,
-          clearFilters,
-          column,
-        }"
-      >
+      <template #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }">
         <div style="padding: 8px">
           <a-input
             ref="searchInput"
-            :placeholder="`Search ${column.dataIndex}`"
+            :placeholder="`recherche ${column.dataIndex}`"
             :value="selectedKeys[0]"
             style="width: 188px; margin-bottom: 8px; display: block"
-            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            @change="(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])"
             @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
           />
           <a-button
@@ -113,11 +105,8 @@ export default defineComponent({
           customRender: 'customRender',
         },
         onFilter: (value, record) =>
-          record.name
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
+          record.name.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: (visible) => {
           if (visible) {
             setTimeout(() => {
               console.log(searchInput.value)
@@ -136,11 +125,8 @@ export default defineComponent({
           customRender: 'customRender',
         },
         onFilter: (value, record) =>
-          record.age
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
+          record.age.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: (visible) => {
           if (visible) {
             setTimeout(() => {
               searchInput.value.focus()
@@ -158,11 +144,8 @@ export default defineComponent({
           customRender: 'customRender',
         },
         onFilter: (value, record) =>
-          record.address
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
+          record.address.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: (visible) => {
           if (visible) {
             setTimeout(() => {
               searchInput.value.focus()
@@ -179,7 +162,7 @@ export default defineComponent({
       state.searchedColumn = dataIndex
     }
 
-    const handleReset = clearFilters => {
+    const handleReset = (clearFilters) => {
       clearFilters()
       state.searchText = ''
     }

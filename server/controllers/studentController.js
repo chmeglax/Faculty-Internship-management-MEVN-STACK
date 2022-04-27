@@ -9,9 +9,10 @@ const validator = {
   cin: Joi.string().required(),
   fName: Joi.string(),
   lName: Joi.string(),
-  access: Joi.object(),
   phone: Joi.number().unsafe(),
   files: Joi.any(),
+  adresse: Joi.string(),
+  section: Joi.string(),
 }
 module.exports = {
   login: (req, res, next) => {
@@ -31,6 +32,9 @@ module.exports = {
           email: user.email,
           fName: user.fName,
           lName: user.lName,
+          files: user.files,
+          phone: user.phone,
+          student: true
         };
 
         /* we only inficate the payload since the header is already created by the jsonwebtoken lib internally
@@ -56,7 +60,7 @@ module.exports = {
           if (user.length >= 1) {
             // checking existence of the user
             return res.status(409).json({
-              message: "email exists",
+              message: "Un compte associé a cet email existe !",
             });
           } else {
 

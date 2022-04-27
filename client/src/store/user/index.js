@@ -2,7 +2,7 @@
 import router from "@/router";
 import * as jwt from "@/services/jwt";
 import JwtDecode from "jwt-decode";
-
+const apiUrl = process.env.VUE_APP_API_URL
 const mapAuthProviders = {
   jwt: {
     login: jwt.login,
@@ -24,6 +24,7 @@ export default {
     status: "",
     avatar: "",
     authorized: /* process.env.VUE_APP_AUTHENTICATED || */ false, // false is default value
+    authorizedStudent: false,
     loading: false,
   },
   mutations: {
@@ -48,26 +49,31 @@ export default {
         login(email, password).then((success) => {
           if (success) {
             console.log(success)
-            const { access, fName, phone, lName, status, email, avatar } = success;
+            const { access, fName, phone, lName, status, email, files, _id } = success;
             let accessList = []
             if (access)
               for (let i in access)
                 if (access[i] === true) accessList.push(i)
             commit("SET_STATE", {
+              _id: _id,
               email: email,
               fName: fName,
               lName: lName,
               phone: phone,
               access: accessList,
               status: status,
-              avatar: avatar,
+              avatar: apiUrl + files,
               authorized: true,
             });
-            resolve(success);
             router.push('/admin')
+            resolve(success);
+
           }
         })
-          .catch((er) => reject(er))
+          .catch((er) => {
+            reject(er)
+            console.log(er)
+          })
           .finally(() => commit("SET_STATE", { loading: false }))
       });
     },
@@ -80,24 +86,32 @@ export default {
 
         const login = mapAuthProviders[rootState.settings.authProvider].loginStudent;
         login(email, password).then((success) => {
-          if (success) {
-            const { access, fName, phone, lName, status, email, avatar } = success;
-            let accessList = []
-            if (access)
-              for (let i in access)
-                if (access[i] === true) accessList.push(i)
-            commit("SET_STATE", {
-              email: email,
-              fName: fName,
-              lName: lName,
-              phone: phone,
-              status: status,
-              avatar: avatar,
-              authorized: true,
-            }); router.replace({ path: '/student/organismes' })
-            resolve(success);
+          try {
+            if (success) {
+              const { access, fName, phone, lName, status, email, files, section, _id } = success;
+              let accessList = []
+              if (access)
+                for (let i in access)
+                  if (access[i] === true) accessList.push(i)
+              commit("SET_STATE", {
+                _id: _id,
+                email: email,
+                fName: fName,
+                lName: lName,
+                phone: phone,
+                section: section,
+                status: status,
+                avatar: apiUrl + files,
+                authorizedStudent: true,
+              });
+              router.replace({ path: '/student/organismes' })
+              resolve(success);
 
+            }
+          } catch (error) {
+            console.log(error)
           }
+
         })
           .catch((er) => {
             reject(er)
@@ -128,6 +142,10 @@ export default {
       const token = localStorage.getItem("accessToken");
       if (!!token) {
         var decoded = JwtDecode(token);
+        console.log("decoded", decoded)
+        let typeAuthorized = "authorized"
+        decoded.student === true ? typeAuthorized = "authorizedStudent" : typeAuthorized = "authorized"
+
         if (decoded.exp < Date.now() / 1000) {
           commit("SET_STATE", {
             email: "",
@@ -137,7 +155,7 @@ export default {
             access: {},
             status: "",
             avatar: "",
-            authorized: false,
+            [typeAuthorized]: false,
             loading: false,
           });
           localStorage.removeItem("accessToken");
@@ -147,19 +165,25 @@ export default {
           if (decoded.access)
             for (let i in decoded.access)
               if (decoded.access[i] === true) accessList.push(i)
+          //            authorizedStudent: false,
+
           commit("SET_STATE", {
+            _id: decoded.sub,
             email: decoded.email,
             fName: decoded.fName,
             lName: decoded.lName,
             phone: decoded.phone,
+            section: decoded.section,
             access: accessList,
             status: decoded.status,
-            avatar: process.env.VUE_APP_API_URL + decoded.avatar,
-            authorized: true,
+            avatar: apiUrl + decoded.files,
+            [typeAuthorized]: true,
+
           });
         }
       }
     },
+
     LOGOUTSTUDENT({ commit, rootState }) {
       const logout = mapAuthProviders[rootState.settings.authProvider].logout;
       logout().then(() => {
@@ -168,10 +192,10 @@ export default {
           fName: "",
           lName: "",
           phone: "",
-          access: {},
+          section: "",
           status: "",
           avatar: "",
-          authorized: false,
+          authorizedStudent: false,
           loading: false,
         });
         router.push({ name: 'loginStudent' })

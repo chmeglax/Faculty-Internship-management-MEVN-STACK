@@ -16,13 +16,15 @@ app.use("/sujet",
         res.locals.validator = {
             name: Joi.string().required(),
             desc: Joi.string(),
-            encadrantS: Joi.object(),
-            specialites: Joi.array(),
+            encadrantS: Joi.any(),
+            specialites: Joi.any(),
             files: Joi.any(),
-            binome: Joi.boolean(),
+            binome: Joi.any(),
             //if sujet is validated it becomes locked
-
-            students: Joi.array()
+            organisme: Joi.any(),
+            section: Joi.any(),
+            type: Joi.any(),
+            students: Joi.any(),
         }
         next()
     },

@@ -4,7 +4,7 @@
       <div class="col-lg-12">
         <div class="card-placeholder">
           <div class="card-header">
-            <vb-headers-heading :data="{ title: 'Géerer les enseignant' }" />
+            <vb-headers-heading :data="{ title: 'Gérer vos PFE/PFA' }" />
           </div>
         </div>
       </div>
@@ -13,24 +13,23 @@
       <div class="col-lg-12">
         <div class="card">
           <div class="card-header">
-            <vb-headers-card-header :data="{ title: 'Liste des enseignants' }" />
+            <vb-headers-card-header :data="{ title: 'Liste des proposition' }" />
           </div>
           <div class="card-body">
-            <a-button type="primary" shape="round" :size="size" @click="showDrawer">
-              <template #icon>
-                <UserAddOutlined />
-              </template>
-              Ajouter
-            </a-button>
             <div class="table-responsive text-nowrap pt-2">
-              <a-table :data-source="dataSource" :columns="columns" :loading="tableLoading">
+              <a-table
+                :data-source="dataSource"
+                :columns="columns"
+                :loading="tableLoading"
+                row-key="_id"
+              >
                 <template
                   #filterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
                 >
                   <div style="padding: 8px">
                     <a-input
                       ref="searchInput"
-                      :placeholder="`Search ${column.dataIndex}`"
+                      :placeholder="`recherche ${column.dataIndex}`"
                       :value="selectedKeys[0]"
                       style="width: 188px; margin-bottom: 8px; display: block"
                       @change="(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])"
@@ -45,17 +44,29 @@
                       <template #icon><SearchOutlined /></template>
                       Search
                     </a-button>
-                    <a-button
-                      size="small"
-                      style="width: 90px"
-                      @click="() => handleReset(clearFilters)"
-                    >
+                    <a-button size="small" style="width: 90px" @click="handleReset(clearFilters)">
                       Reset
                     </a-button>
                   </div>
                 </template>
+                <template #validated="{ text }">
+                  <a-tag v-if="!text" color="#f50">pas encore validé</a-tag>
+                  <a-tag v-else color="#87d068">validé</a-tag>
+                </template>
+                <template #binome="{ text }">
+                  <a-tag v-if="text" color="processing">binome</a-tag>
+                  <a-tag v-else color="warning">monome</a-tag>
+                </template>
                 <template #filterIcon="filtered">
                   <search-outlined :style="{ color: filtered ? '#108ee9' : undefined }" />
+                </template>
+                <template #expandedRowRender="{ record }">
+                  <p style="margin: 0">
+                    {{ record.desc }}
+                  </p>
+                  <p v-if="record.files" style="margin: 0">
+                    <a :href="apiUrl + record.files" target="_blank">Fichier associeé</a>
+                  </p>
                 </template>
                 <template #customRender="{ text, column }">
                   <span v-if="searchText && searchedColumn === column.dataIndex">
@@ -78,18 +89,17 @@
                     {{ text }}
                   </template>
                 </template>
-                <template #specialites="{ text }">
-                  <a-tag color="#87d068" v-for="s in text" :key="s._id">{{ s.name }}</a-tag>
-                </template>
                 <template #action="{ record }">
                   <span>
-                    <a class="btn btn-sm btn-light mr-2" @click="editT(record)">
-                      <i class="fe fe-edit mr-2" />
-                      Modifier
+                    <a class="btn btn-sm btn-light mr-2" @click="showModal(record)">
+                      Affécter a des enseignants<i class="fe fe-arrow-right ml-1" />
                     </a>
-                    <a class="btn btn-sm btn-light mr-2" @click="deleteT(record)">
-                      <i class="fe fe-edit mr-2" />
-                      Supprimer
+                    <a class="btn btn-sm btn-light" @click="rejectSujet(record)">
+                      <small>
+                        <i v-if="record.validated" class="fe fe-trash mr-2" />
+                        <i v-else class="fe fe-check mr-2" />
+                      </small>
+                      {{ record.validated == true ? 'rejéter' : 'valider' }}
                     </a>
                   </span>
                 </template>
@@ -99,164 +109,22 @@
         </div>
       </div>
     </div>
-    <!-- add drawer -->
-    <a-drawer
-      title="Ajouter un ensignant"
-      :width="720"
-      :visible="visible"
-      :body-style="{ paddingBottom: '80px' }"
-      :footer-style="{ textAlign: 'right' }"
-      @close="onClose"
-      @finish="onFinish"
-      @finishFailed="onFinishFailed"
+    <a-modal
+      v-model:visible="visible"
+      title="Affecter des enseignants pour valider un sujet"
+      @ok="handleOk"
     >
-      <a-form :model="form" :rules="rules" layout="vertical">
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="nom" name="lName">
-              <a-input v-model:value="form.lName" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="prénom" name="fName">
-              <a-input v-model:value="form.fName" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="Cin" name="cin">
-              <a-input v-model:value="form.cin" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="Téléphone" name="phone">
-              <a-input v-model:value="form.phone" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="Email" name="email">
-              <a-input v-model:value="form.email" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="Mot de passe" name="password">
-              <a-input-password
-                v-model:value="form.password"
-                placeholder="Please enter user name"
-              />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="Spécialiés" name="specialites">
-              <a-select
-                v-model:value="form.specialites"
-                mode="multiple"
-                placeholder="Please select"
-                style="width: 200px"
-              >
-                <a-select-option
-                  v-for="speciality in specialites"
-                  :key="speciality._id"
-                  :value="speciality._id"
-                >
-                  {{ speciality.name }}
-                </a-select-option></a-select
-              >
-            </a-form-item>
-          </a-col>
-        </a-row>
-      </a-form>
-      <template #extra>
-        <a-space>
-          <a-button @click="onClose">Cancel</a-button>
-          <a-button type="primary" @click="addT">Submit</a-button>
-        </a-space>
-      </template>
-    </a-drawer>
-    <!-- edit drawer -->
-    <a-drawer
-      title="Modifier un ensignant"
-      :width="720"
-      :visible="visibleEdit"
-      :body-style="{ paddingBottom: '80px' }"
-      :footer-style="{ textAlign: 'right' }"
-      @close="onClose"
-      @finish="onFinish"
-      @finishFailed="onFinishFailed"
-    >
-      <a-form :model="activeTeacher" :rules="rules" layout="vertical">
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="nom" name="lName">
-              <a-input v-model:value="activeTeacher.lName" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="prénom" name="fName">
-              <a-input v-model:value="activeTeacher.fName" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="Cin" name="cin">
-              <a-input v-model:value="activeTeacher.cin" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="Téléphone" name="phone">
-              <a-input v-model:value="activeTeacher.phone" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="Email" name="email">
-              <a-input v-model:value="activeTeacher.email" placeholder="Please enter user name" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="Mot de passe" name="password">
-              <a-input-password
-                v-model:value="activeTeacher.password"
-                placeholder="Please enter user name"
-              />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="Spécialiés" name="specialites">
-              <a-select
-                v-model:value="activeTeacher.specialites"
-                mode="multiple"
-                placeholder="Please select"
-                style="width: 200px"
-              >
-                <a-select-option
-                  v-for="speciality in specialites"
-                  :key="speciality._id"
-                  :value="speciality._id"
-                >
-                  {{ speciality.name }}
-                </a-select-option></a-select
-              >
-            </a-form-item>
-          </a-col>
-        </a-row>
-      </a-form>
-      <template #extra>
-        <a-space>
-          <a-button @click="onClose">Cancel</a-button>
-          <a-button type="primary" @click="saveT">Submit</a-button>
-        </a-space>
-      </template>
-    </a-drawer>
+      <label> Sujet : {{ activeSujet.name }}</label>
+      <a-transfer
+        :titles="['. Non Affectés', '. Affectés']"
+        v-model:target-keys="targetKeys"
+        :data-source="teachersData"
+        show-search
+        :filter-option="filterOption"
+        :render="renderItem"
+        @change="handleChange"
+      />
+    </a-modal>
   </div>
 </template>
 
@@ -264,22 +132,30 @@
 import VbHeadersHeading from '@/@vb/widgets/Headers/Heading'
 import VbHeadersCardHeader from '@/@vb/widgets/Headers/CardHeader'
 import { message } from 'ant-design-vue'
+import { useRouter } from 'vue-router'
+import { useStore } from 'vuex'
 
-import { SearchOutlined, UserAddOutlined } from '@ant-design/icons-vue'
-import { defineComponent, reactive, ref } from 'vue'
+import { SearchOutlined } from '@ant-design/icons-vue'
+import { defineComponent, reactive, ref, computed } from 'vue'
 import ApiClient from '@/services/axios'
 export default defineComponent({
   components: {
     VbHeadersHeading,
     VbHeadersCardHeader,
-    UserAddOutlined,
     SearchOutlined,
   },
   setup() {
+    const apiUrl = process.env.VUE_APP_API_URL
+
+    const router = useRouter()
+    const store = useStore()
+
+    const user = computed(() => store.getters['user/user'])
+
     const searchInput = ref()
     const columns = [
       {
-        title: 'Name',
+        title: 'Titre sujet',
         dataIndex: 'name',
         key: 'name',
         slots: {
@@ -298,16 +174,16 @@ export default defineComponent({
         },
       },
       {
-        title: 'cin',
-        dataIndex: 'cin',
-        key: 'cin',
+        title: 'organisme',
+        dataIndex: 'organisme',
+        key: 'organisme',
         slots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
           customRender: 'customRender',
         },
         onFilter: (value, record) =>
-          record.cin.toString().toLowerCase().includes(value.toLowerCase()),
+          record.organisme.toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownVisibleChange: (visible) => {
           if (visible) {
             setTimeout(() => {
@@ -317,16 +193,16 @@ export default defineComponent({
         },
       },
       {
-        title: 'email',
-        dataIndex: 'email',
-        key: 'email',
+        title: 'type',
+        dataIndex: 'type',
+        key: 'type',
         slots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
           customRender: 'customRender',
         },
         onFilter: (value, record) =>
-          record.email.toString().toLowerCase().includes(value.toLowerCase()),
+          record.type.toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownVisibleChange: (visible) => {
           if (visible) {
             setTimeout(() => {
@@ -336,16 +212,16 @@ export default defineComponent({
         },
       },
       {
-        title: 'Téléphone',
-        dataIndex: 'phone',
-        key: 'phone',
+        title: 'binome',
+        dataIndex: 'binome',
+        key: 'binome',
         slots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
-          customRender: 'customRender',
+          customRender: 'binome',
         },
         onFilter: (value, record) =>
-          record.phone.toString().toLowerCase().includes(value.toLowerCase()),
+          record.binome.toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownVisibleChange: (visible) => {
           if (visible) {
             setTimeout(() => {
@@ -355,16 +231,16 @@ export default defineComponent({
         },
       },
       {
-        title: 'Spécialités',
-        dataIndex: 'specialites',
-        key: 'specialites',
+        title: 'status',
+        dataIndex: 'validated',
+        key: 'validated',
         slots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
-          customRender: 'specialites',
+          customRender: 'validated',
         },
         onFilter: (value, record) =>
-          record.specialites.toString().toLowerCase().includes(value.toLowerCase()),
+          record.validated.toString().toLowerCase().includes(value.toLowerCase()),
         onFilterDropdownVisibleChange: (visible) => {
           if (visible) {
             setTimeout(() => {
@@ -384,26 +260,13 @@ export default defineComponent({
     })
     const tableLoading = ref(true)
     const dataSource = ref([])
-    //get specialites
-    const specialites = ref([])
-    ApiClient.post('/admin/specialty/filter', {
+
+    //get organismes
+    ApiClient.post('/student/sujet/filter', {
       query: {},
     })
       .then((res) => {
-        specialites.value = res.data
-      })
-      .catch((e) => {
-        console.log(e)
-      })
-    //get teachers
-    ApiClient.post('/admin/teacher/', {
-      query: {},
-    })
-      .then((res) => {
-        dataSource.value = res.data.map((e) => ({
-          ...e,
-          name: e.fName + ' ' + e.lName,
-        }))
+        dataSource.value = res.data
       })
       .catch((e) => {
         message.error('Veuillez refraichir la page ! ')
@@ -420,154 +283,117 @@ export default defineComponent({
     }
 
     const handleReset = (clearFilters) => {
-      clearFilters(clearFilters)
+      clearFilters()
       state.searchText = ''
-      console.log(state.searchText)
+    }
+    const rejectSujet = (record) => {
+      console.log(record)
+      const updateData = { validated: !record.validated }
+
+      ApiClient.patch('/student/sujet/' + record._id, { data: updateData })
+        .then(() => {
+          dataSource.value = dataSource.value.map((elem) =>
+            elem._id == record._id ? { ...elem, validated: !record.validated } : elem,
+          )
+          message.success(`Sujet modifié`)
+        })
+        .catch((e) => {
+          message.warning('Impossible de modifier le sujet pour cet utilisateur')
+        })
     }
 
-    const deleteT = (record) => {
-      ApiClient.delete('/admin/teacher/' + record._id)
-        .then((res) => {
-          dataSource.value = dataSource.value.filter((e) => {
-            return e._id !== record._id
-          })
-          message.success('Enseignant supprimé avec succées ! ')
-        })
-        .catch((e) => {
-          message.success('veuillez réesseilez ! ')
-        })
-    }
-    const addT = () => {
-      ApiClient.put('/admin/teacher/', form)
-        .then((res) => {
-          res.data.name = res.data.fName + ' ' + res.data.lName
-          dataSource.value.push(res.data)
-          message.success('Enseignant ajouter avec succées ! ')
-          visible.value = false
-        })
-        .catch((e) => {
-          console.log(e.response.data.message)
-          message.error(e.response.data.message)
-        })
-    }
-    //drawer actions
-    const form = reactive({
-      fName: '',
-      lName: '',
-      phone: '',
-      cin: '',
-      email: '',
-      specialites: [],
-    })
-    const rules = {
-      fName: [
-        {
-          required: true,
-          message: 'Please enter user name',
-        },
-      ],
-      lName: [
-        {
-          required: true,
-          message: 'please enter url',
-        },
-      ],
-      phone: [
-        {
-          required: false,
-          message: 'Please select an owner',
-        },
-      ],
-      cin: [
-        {
-          required: true,
-          message: 'Please choose the type',
-        },
-      ],
-      email: [
-        {
-          required: true,
-          message: 'Please choose the type',
-        },
-      ],
-      password: [
-        {
-          required: true,
-          message: 'Please choose the type',
-        },
-      ],
-    }
+    //modal
     const visible = ref(false)
-
-    const showDrawer = () => {
-      visible.value = true
-    }
-
-    const onClose = () => {
-      visible.value = false
-      visibleEdit.value = false
-    }
-    const onFinish = (values) => {
-      console.log('Success:', values)
-    }
-
-    const onFinishFailed = (errorInfo) => {
-      console.log('Failed:', errorInfo)
-    }
-    //edit drawer
-    const activeTeacher = reactive({
-      fName: '',
-      lName: '',
-      phone: '',
-      cin: '',
-      email: '',
-      specialites: [],
-    })
-    const visibleEdit = ref(false)
-    const editT = (record) => {
-      activeTeacher.value = JSON.parse(JSON.stringify(record))
-      activeTeacher.specialites = record.specialites.map((e) => e._id)
-      activeTeacher.fName = record.fName
-      activeTeacher.lName = record.lName
-      activeTeacher.phone = record.phone
-      activeTeacher.cin = record.cin
-      activeTeacher.email = record.email
-      visibleEdit.value = true
-    }
-    const saveT = () => {
-      ApiClient.patch('/admin/teacher/' + activeTeacher.value._id, {
-        data: activeTeacher,
+    const activeSujet = ref({})
+    const showModal = (record) => {
+      targetKeys.value = []
+      ApiClient.post('/admin/validation/filter', {
+        query: {
+          sujet: record._id,
+        },
+        aggregation: [
+          {
+            $project: {
+              teacher: 1,
+            },
+          },
+        ],
       })
         .then((res) => {
-          dataSource.value = dataSource.value.map((elem) =>
-            elem._id == activeTeacher.value._id
-              ? {
-                  ...elem,
-                  specialites: specialites.value.filter((e) =>
-                    activeTeacher.specialites.includes(e._id),
-                  ),
-                  lName: activeTeacher.lName,
-                  fName: activeTeacher.fName,
-                  name: activeTeacher.lName + ' ' + activeTeacher.fName,
-                  phone: activeTeacher.phone,
-                  cin: activeTeacher.cin,
-                  email: activeTeacher.email,
-                }
-              : elem,
-          )
-          //activeTeacher.value = res.data
-          message.success('Enseignat modifié ! ')
+          targetKeys.value = res.data.map((elem) => elem.teacher)
+          activeSujet.value = record
+          visible.value = true
         })
         .catch((e) => {
-          console.log(e)
-          message.error('Veuillez refraichir la page ! ')
-        })
-        .finally(() => {
-          visibleEdit.value = false
+          message.warning('Impossible de récuperer la liste des enseignants déja affecté')
         })
     }
 
+    const handleOk = (e) => {
+      console.log(e)
+      console.log('targetKeys', targetKeys.value)
+      ApiClient.patch('/admin/validation/' + activeSujet.value._id, { teachers: targetKeys.value })
+        .then(() => {
+          message.success(`Enseignatn affecteés`)
+        })
+        .catch((e) => {
+          message.warning("Impossible d'affecter des enseignants")
+        })
+        .finally(() => (visible.value = false))
+    }
+    //transfer component
+    const teachersData = ref([])
+    const targetKeys = ref([])
+    ApiClient.post('/admin/teacher/', {
+      query: {
+        status: 'active',
+      },
+      aggregation: [
+        {
+          $lookup: {
+            from: 'specialties',
+            localField: 'specialites',
+            foreignField: '_id',
+            as: 'specialites',
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            specialites: 1,
+            fName: 1,
+            lName: 1,
+          },
+        },
+      ],
+    })
+      .then((res) => {
+        teachersData.value = res.data.map((elem) => ({
+          ...elem,
+          key: elem._id,
+        }))
+      })
+      .catch((e) => {
+        message.warning('Impossible de récuperer la liste des enseignants')
+      })
+
+    const filterOption = (inputValue, option) => {
+      return option.description.indexOf(inputValue) > -1
+    }
+    const handleChange = (keys, direction, moveKeys) => {
+      console.log(keys, direction, moveKeys)
+    }
+    const renderItem = (item) => {
+      let fullName = item.lName + ' ' + item.fName
+      const customLabel = <span class="custom-item">{fullName}</span>
+
+      return {
+        label: customLabel, // for displayed item
+        value: fullName, // for title and filter matching
+      }
+    }
     return {
+      apiUrl,
       columns,
       handleSearch,
       handleReset,
@@ -576,18 +402,18 @@ export default defineComponent({
       searchedColumn: '',
       dataSource,
       tableLoading,
-      deleteT,
-      editT,
-      form,
-      rules,
+      router,
+      rejectSujet,
       visible,
-      showDrawer,
-      onClose,
-      addT,
-      specialites,
-      activeTeacher,
-      visibleEdit,
-      saveT,
+      showModal,
+      handleOk,
+      activeSujet,
+      //transfer
+      renderItem,
+      teachersData,
+      targetKeys,
+      filterOption,
+      handleChange,
     }
   },
 })
@@ -596,5 +422,28 @@ export default defineComponent({
 .highlight {
   background-color: rgb(255, 192, 105);
   padding: 0px;
+}
+a:link {
+  color: rgb(46, 91, 181);
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: rgb(1, 113, 46);
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: rgb(49, 181, 179);
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:active {
+  color: yellow;
+  background-color: transparent;
+  text-decoration: underline;
 }
 </style>

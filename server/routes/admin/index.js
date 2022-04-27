@@ -3,6 +3,8 @@ const app = express();
 const Joi = require("joi");
 const CRUDRoutes = require("@middlewares/CRUDRoute")
 const teacherRoutes = require("./teacherRoutes")
+const validationRoutes = require("./validationRoutes")
+
 const passport = require("passport");
 
 //? access infromation CRUD 
@@ -49,4 +51,11 @@ app.use("/organisme",
         next()
     },
     CRUDRoutes)
+
+app.use("/validation",
+    (req, res, next) => {
+        res.locals.modelName = "ValidationModal"
+        next()
+    },
+    validationRoutes)
 module.exports = app

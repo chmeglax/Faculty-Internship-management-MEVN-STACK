@@ -3,8 +3,9 @@
 //////////////////////////////////////////////////////////////////////////////////////////
 /* AUTH */
 
+
 .container {
-  max-width: rem(450);
+  max-width: rem(650);
   min-width: rem(450);
   padding: rem(40);
   margin-left: auto;
@@ -24,12 +25,14 @@
     margin-right: rem(6);
     height: rem(48);
     width: rem(48);
+
     path:nth-child(1) {
       stroke: $primary;
       fill: $primary;
       stroke-width: 1px;
       animation: logoAnimate 6s ease-in-out infinite;
     }
+
     path:nth-child(2) {
       stroke: $primary;
       fill: $primary;
@@ -37,6 +40,7 @@
       animation: logoAnimate 6s ease-in-out infinite;
       animation-delay: 2s;
     }
+
     path:nth-child(3) {
       stroke: $primary;
       fill: $primary;
@@ -50,10 +54,12 @@
         stroke: $primary;
         fill: $primary;
       }
+
       50% {
         stroke: #1ad697;
         fill: #1ad697;
       }
+
       100% {
         stroke: $primary;
         fill: $primary;

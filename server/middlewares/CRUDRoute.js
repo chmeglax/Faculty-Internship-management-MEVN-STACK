@@ -8,7 +8,7 @@ const upload = require("@middlewares/multer")
 this file should not be modified unless you want to add
 a global crud fonctionality
 */
-app.put("/",
+app.put("/", upload.array('files', 1),
     CRUD.create,
     CRUD.resultHundler,
 );

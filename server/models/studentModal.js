@@ -6,12 +6,15 @@ const bcrypt = require('bcrypt');
 const { Schema } = mongoose;
 const StudentSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, auto: true },
+  num: { type: String },
+  cin: { type: Number, unique: true, required: true },
   email: { type: String, required: true },
   fName: { type: String, required: false },
   lName: { type: String, required: false },
   phone: { type: String, required: false },
+  adresse: { type: String, required: false },
+  section: { type: String, required: false },
   password: { type: String, required: true },
-  access: { type: Object, required: false },
   status: {
     type: String,
     default: "active",
