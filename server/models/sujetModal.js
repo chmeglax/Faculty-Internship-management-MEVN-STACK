@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const SujetSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, auto: true },
-    code: { type: String },
+    code: { type: Number, required: true },
     name: { type: String, required: true },
     desc: { type: String, required: true },
     organisme: {

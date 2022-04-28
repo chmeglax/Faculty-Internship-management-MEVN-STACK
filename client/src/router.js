@@ -27,17 +27,33 @@ const router = createRouter({
         {
           path: '/admin/organismes',
           meta: { title: 'Organismes' },
-          component: () => import('./views/organismes'),
+          component: () => import('./views/serviceStage/organismes'),
         },
         {
           path: '/admin/enseignants',
           meta: { title: 'Enseignant' },
-          component: () => import('./views/teachers'),
+          component: () => import('./views/administration/teachers'),
         }, {
           path: '/admin/sujets',
           meta: { title: 'Sujets' },
-          component: () => import('./views/sujets'),
+          component: () => import('./views/administration/sujets'),
         },
+        {
+          path: '/admin/session',
+          meta: { title: 'Session' },
+          component: () => import('./views/serviceStage/session'),
+        },
+        {
+          path: '/admin/sujetaffecte',
+          meta: { title: 'Session' },
+          component: () => import('./views/teachers/sujetAffecte'),
+        },
+        {
+          path: '/admin/soutenance',
+          meta: { title: 'planification soutenance' },
+          component: () => import('./views/serviceStage/planifSoutenance'),
+        },
+
         // VB:REPLACE-END:ROUTER-CONFIG
       ],
     },

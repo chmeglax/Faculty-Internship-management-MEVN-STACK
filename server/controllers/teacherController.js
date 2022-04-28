@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const passport = require("passport");
-const { TeacherModal } = require('@models')
+const { TeacherModal, ValidationModal, SujetModal } = require('@models')
 const Joi = require("joi");
 
 const validator = {
@@ -83,6 +83,31 @@ module.exports = {
 
     },
 
+    getAffectedSujet: async (req, res, next) => {
+        try {
+            const idTeacher = req.params.id
+            console.log(idTeacher)
+            let errors = 0
+            const toValidate = await ValidationModal.find({ teacher: idTeacher }).distinct('sujet');
+            console.log(toValidate)
+            SujetModal.find({ _id: { $in: toValidate } }, function (err, docs) {
+                if (!err)
+                    res.json(docs)
+                else res.status(408).json({ error: err })
+            });
+
+
+
+        }
+        catch (e) {
+            console.log(e)
+            res.status(422).json({
+                message: e.stack
+            })
+        }
+
+
+    }
 }
 
 

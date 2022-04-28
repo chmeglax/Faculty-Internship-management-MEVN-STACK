@@ -1,12 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const Joi = require("joi");
 const CRUD = require("@controllers/UtilitiesControlles")
-const teacherController = require("@controllers/teacherController")
 const upload = require("@middlewares/multer")
+const { SujetModal } = require('@models')
 
-router.post('/login', teacherController.login)
-router.put("/", upload.array('files', 1), teacherController.createUser)
+router.put("/", upload.array('files', 1),
+    async (req, res, next) => {
+        const code = await SujetModal.countDocuments({});
+        req.body.code = code + 1
+        next();
+    },
+    CRUD.create,
+    CRUD.resultHundler)
 router.delete(
     "/:id",
 
@@ -30,13 +35,10 @@ router.patch(
     CRUD.resultHundler
 );
 router.post(
-    "/",
+    "/filter",
     CRUD.filter,
     CRUD.resultHundler
 );
-router.post(
-    "/sujet/:id",
-    teacherController.getAffectedSujet
-);
+
 
 module.exports = router;

@@ -155,6 +155,25 @@ export default defineComponent({
     const searchInput = ref()
     const columns = [
       {
+        title: 'Code',
+        dataIndex: 'code',
+        key: 'code',
+        slots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'customRender',
+        },
+        onFilter: (value, record) =>
+          record.code.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: (visible) => {
+          if (visible) {
+            setTimeout(() => {
+              searchInput.value.focus()
+            }, 0)
+          }
+        },
+      },
+      {
         title: 'Titre sujet',
         dataIndex: 'name',
         key: 'name',

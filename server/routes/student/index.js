@@ -3,6 +3,8 @@ const app = express();
 const Joi = require("joi");
 const CRUDRoutes = require("@middlewares/CRUDRoute")
 const studentRoutes = require("./studentRoutes")
+const sujetRoutes = require("./sujetRoutes")
+
 const passport = require("passport");
 app.use("/",
     (req, res, next) => {
@@ -25,8 +27,9 @@ app.use("/sujet",
             section: Joi.any(),
             type: Joi.any(),
             students: Joi.any(),
+            code: Joi.number(),
         }
         next()
     },
-    CRUDRoutes)
+    sujetRoutes)
 module.exports = app

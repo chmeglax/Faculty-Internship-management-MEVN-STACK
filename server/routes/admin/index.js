@@ -4,6 +4,7 @@ const Joi = require("joi");
 const CRUDRoutes = require("@middlewares/CRUDRoute")
 const teacherRoutes = require("./teacherRoutes")
 const validationRoutes = require("./validationRoutes")
+const soutenanceRoutes = require("./soutenanceRoutes")
 
 const passport = require("passport");
 
@@ -58,4 +59,23 @@ app.use("/validation",
         next()
     },
     validationRoutes)
+
+app.use("/session",
+    (req, res, next) => {
+        res.locals.modelName = "SessionModal";
+        res.locals.validator = {
+            start: Joi.date().required(),
+            end: Joi.date().required(),
+            type: Joi.string(),
+            code: Joi.string(),
+        }
+        next()
+    },
+    CRUDRoutes)
+app.use("/soutenance",
+    (req, res, next) => {
+        res.locals.modelName = "SoutenanceModal"
+        next()
+    },
+    soutenanceRoutes)
 module.exports = app

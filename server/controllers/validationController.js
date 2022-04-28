@@ -1,4 +1,4 @@
-const { ValidationModal } = require('@models')
+const { ValidationModal, SujetModal } = require('@models')
 const Joi = require("joi");
 
 const validator = {
@@ -51,6 +51,36 @@ module.exports = {
 
     },
 
+    submitValidation: async (req, res, next) => {
+        try {
+            const idValidation = req.params.idValidation
+            const updateData = req.body
+
+            let errors = 0
+            ValidationModal.findOneAndUpdate({ _id: idValidation },
+                updateData, async function (err, doc) {
+                    if (err) {
+                        console.log(err)
+                        res.status(409).json(err)
+                    }
+                    else {
+                        const count = await ValidationModal.countDocuments({ sujet: doc.sujet, validated: true });
+                        if (count > 1)
+                            SujetModal.updateOne({ _id: doc.sujet }, { validated: true, locked: true }).exec()
+                        else SujetModal.updateOne({ _id: doc.sujet }, { validated: false, locked: false }).exec()
+                        res.json({ message: "validation mis a jour!" })
+                    }
+                });
+        }
+        catch (e) {
+            console.log(e)
+            res.status(422).json({
+                message: e.stack
+            })
+        }
+
+
+    },
 }
 
 

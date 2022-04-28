@@ -4,7 +4,7 @@
       <div class="col-lg-12">
         <div class="card-placeholder">
           <div class="card-header">
-            <vb-headers-heading :data="{ title: 'Gérer vos PFE/PFA' }" />
+            <vb-headers-heading :data="{ title: 'Planification des soutenances' }" />
           </div>
         </div>
       </div>
@@ -13,20 +13,9 @@
       <div class="col-lg-12">
         <div class="card">
           <div class="card-header">
-            <vb-headers-card-header :data="{ title: 'Liste des proposition' }" />
+            <vb-headers-card-header :data="{ title: 'Liste des sujet validés' }" />
           </div>
           <div class="card-body">
-            <a-button
-              type="primary"
-              shape="round"
-              :size="size"
-              @click="() => router.push('/student/proposition/ajouter')"
-            >
-              <template #icon>
-                <UserAddOutlined />
-              </template>
-              Ajouter
-            </a-button>
             <div class="table-responsive text-nowrap pt-2">
               <a-table
                 :data-source="dataSource"
@@ -100,12 +89,42 @@
                     {{ text }}
                   </template>
                 </template>
+                <template #action="{ record }">
+                  <span>
+                    <a class="btn btn-sm btn-light mr-2" @click="showModal(record)">
+                      Planifier<i class="fe fe-arrow-right ml-1" />
+                    </a>
+                  </span>
+                </template>
               </a-table>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <a-modal
+      v-model:visible="visible"
+      title="Affecter des enseignants pour valider un sujet"
+      @ok="handleOk"
+    >
+      <a-form :model="formState" name="basic">
+        <a-form-item
+          label="Username"
+          name="username"
+          :rules="[{ required: true, message: 'Please input your username!' }]"
+        >
+          <a-input v-model:value="formState.username" />
+        </a-form-item>
+
+        <a-form-item
+          label="Password"
+          name="password"
+          :rules="[{ required: true, message: 'Please input your password!' }]"
+        >
+          <a-input-password v-model:value="formState.password" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
@@ -116,7 +135,7 @@ import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
-import { SearchOutlined, UserAddOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined } from '@ant-design/icons-vue'
 import { defineComponent, reactive, ref, computed } from 'vue'
 import ApiClient from '@/services/axios'
 export default defineComponent({
@@ -124,7 +143,6 @@ export default defineComponent({
     VbHeadersHeading,
     VbHeadersCardHeader,
     SearchOutlined,
-    UserAddOutlined,
   },
   setup() {
     const apiUrl = process.env.VUE_APP_API_URL
@@ -231,24 +249,10 @@ export default defineComponent({
           }
         },
       },
+
       {
-        title: 'status',
-        dataIndex: 'validated',
-        key: 'validated',
-        slots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'validated',
-        },
-        onFilter: (value, record) =>
-          record.validated.toString().toLowerCase().includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: (visible) => {
-          if (visible) {
-            setTimeout(() => {
-              searchInput.value.focus()
-            })
-          }
-        },
+        title: 'Action',
+        slots: { customRender: 'action' },
       },
     ]
     const state = reactive({
@@ -260,7 +264,7 @@ export default defineComponent({
 
     //get organismes
     ApiClient.post('/student/sujet/filter', {
-      query: { students: user.value._id },
+      query: { validated: true },
     })
       .then((res) => {
         dataSource.value = res.data
@@ -283,6 +287,47 @@ export default defineComponent({
       clearFilters()
       state.searchText = ''
     }
+    const rejectSujet = (record) => {
+      console.log(record)
+      const updateData = { validated: !record.validated }
+
+      ApiClient.patch('/student/sujet/' + record._id, { data: updateData })
+        .then(() => {
+          dataSource.value = dataSource.value.map((elem) =>
+            elem._id == record._id ? { ...elem, validated: !record.validated } : elem,
+          )
+          message.success(`Sujet modifié`)
+        })
+        .catch((e) => {
+          message.warning('Impossible de modifier le sujet pour cet utilisateur')
+        })
+    }
+
+    //modal
+    const visible = ref(false)
+    const activeSujet = ref({})
+    const formState = reactive({
+      username: '',
+      password: '',
+      remember: true,
+    })
+    const showModal = (record) => {
+      activeSujet.value = record
+      visible.value = true
+    }
+
+    const handleOk = (e) => {
+      console.log(formState.value)
+      console.log('activeSujet', activeSujet.value)
+      /*ApiClient.patch('/admin/validation/' + activeSujet.value._id, { teachers: targetKeys.value })
+        .then(() => {
+          message.success(`Enseignatn affecteés`)
+        })
+        .catch((e) => {
+          message.warning("Impossible d'affecter des enseignants")
+        })
+        .finally(() => (visible.value = false))*/
+    }
 
     return {
       apiUrl,
@@ -295,6 +340,12 @@ export default defineComponent({
       dataSource,
       tableLoading,
       router,
+      rejectSujet,
+      visible,
+      showModal,
+      handleOk,
+      activeSujet,
+      formState,
     }
   },
 })

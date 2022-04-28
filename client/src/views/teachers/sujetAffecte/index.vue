@@ -16,17 +16,6 @@
             <vb-headers-card-header :data="{ title: 'Liste des proposition' }" />
           </div>
           <div class="card-body">
-            <a-button
-              type="primary"
-              shape="round"
-              :size="size"
-              @click="() => router.push('/student/proposition/ajouter')"
-            >
-              <template #icon>
-                <UserAddOutlined />
-              </template>
-              Ajouter
-            </a-button>
             <div class="table-responsive text-nowrap pt-2">
               <a-table
                 :data-source="dataSource"
@@ -100,12 +89,31 @@
                     {{ text }}
                   </template>
                 </template>
+                <template #action="{ record }">
+                  <span>
+                    <a class="btn btn-sm btn-light" @click="showModal(record)">
+                      <small>
+                        <i v-if="record.tValidated" class="fe fe-trash mr-2" />
+                        <i v-else class="fe fe-check mr-2" />
+                      </small>
+                      {{ record.tValidated == true ? 'rejéter' : 'valider' }}
+                    </a>
+                  </span>
+                </template>
               </a-table>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <a-modal v-model:visible="visible" title="Fenétre de validation">
+      <label> Sujet a validé : {{ activeSujet.name }}</label>
+      <a-textarea v-model:value="comment" placeholder="saisir un commentaire" :rows="4" />
+      <template #footer>
+        <a-button key="submit" @click="handleOk(false)">Rejéter</a-button>
+        <a-button key="back" type="primary" @click="handleOk(true)">Valider</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
@@ -116,7 +124,7 @@ import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 
-import { SearchOutlined, UserAddOutlined } from '@ant-design/icons-vue'
+import { SearchOutlined } from '@ant-design/icons-vue'
 import { defineComponent, reactive, ref, computed } from 'vue'
 import ApiClient from '@/services/axios'
 export default defineComponent({
@@ -124,7 +132,6 @@ export default defineComponent({
     VbHeadersHeading,
     VbHeadersCardHeader,
     SearchOutlined,
-    UserAddOutlined,
   },
   setup() {
     const apiUrl = process.env.VUE_APP_API_URL
@@ -232,7 +239,26 @@ export default defineComponent({
         },
       },
       {
-        title: 'status',
+        title: 'Ma validation',
+        dataIndex: 'tValidated',
+        key: 'tValidated',
+        slots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'validated',
+        },
+        onFilter: (value, record) =>
+          record.tValidated.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: (visible) => {
+          if (visible) {
+            setTimeout(() => {
+              searchInput.value.focus()
+            })
+          }
+        },
+      },
+      {
+        title: 'status du sujet',
         dataIndex: 'validated',
         key: 'validated',
         slots: {
@@ -250,6 +276,10 @@ export default defineComponent({
           }
         },
       },
+      {
+        title: 'Action',
+        slots: { customRender: 'action' },
+      },
     ]
     const state = reactive({
       searchText: '',
@@ -257,20 +287,37 @@ export default defineComponent({
     })
     const tableLoading = ref(true)
     const dataSource = ref([])
-
-    //get organismes
-    ApiClient.post('/student/sujet/filter', {
-      query: { students: user.value._id },
-    })
-      .then((res) => {
-        dataSource.value = res.data
+    const validations = ref([])
+    const getData = () => {
+      tableLoading.value = true
+      ApiClient.post('/admin/validation/filter', {
+        query: { teacher: user.value._id },
       })
-      .catch((e) => {
-        message.error('Veuillez refraichir la page ! ')
+        .then((res) => {
+          validations.value = res.data
+        })
+        .catch((e) => {
+          message.error('Veuillez refraichir la page ! ')
+        })
+      //get sujet
+      ApiClient.post('/admin/teacher/sujet/' + user.value._id, {
+        query: {},
       })
-      .finally(() => {
-        tableLoading.value = false
-      })
+        .then((res) => {
+          dataSource.value = res.data.map((elem) => {
+            let teacherV = validations.value.find((v) => v.sujet === elem._id)
+            return { ...elem, tValidated: teacherV.validated, _idV: teacherV._id }
+          })
+        })
+        .catch((e) => {
+          console.log(e)
+          message.error('Veuillez refraichir la page ! ')
+        })
+        .finally(() => {
+          tableLoading.value = false
+        })
+    }
+    getData()
 
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
       confirm()
@@ -282,6 +329,49 @@ export default defineComponent({
     const handleReset = (clearFilters) => {
       clearFilters()
       state.searchText = ''
+    }
+    const rejectSujet = (record) => {
+      console.log(record)
+      const updateData = { validated: !record.validated }
+
+      ApiClient.patch('/student/sujet/' + record._id, { data: updateData })
+        .then(() => {
+          dataSource.value = dataSource.value.map((elem) =>
+            elem._id == record._id ? { ...elem, validated: !record.validated } : elem,
+          )
+          message.success(`Sujet modifié`)
+        })
+        .catch((e) => {
+          message.warning('Impossible de modifier le sujet pour cet utilisateur')
+        })
+    }
+
+    //modal
+    const visible = ref(false)
+    const activeSujet = ref({})
+    const showModal = (record) => {
+      activeSujet.value = record
+      visible.value = true
+    }
+    const comment = ref('')
+    const handleOk = (tValidated) => {
+      console.log(tValidated)
+      console.log('comment:', comment.value)
+
+      ApiClient.put('/admin/validation/' + activeSujet.value._idV, {
+        comment: comment.value,
+        validated: tValidated,
+      })
+        .then(() => {
+          message.success('validation mis a jour!')
+          getData()
+        })
+        .catch((e) => {
+          message.warning("Impossible de mettre a jour l'activation")
+        })
+        .finally(() => {
+          visible.value = false
+        })
     }
 
     return {
@@ -295,6 +385,12 @@ export default defineComponent({
       dataSource,
       tableLoading,
       router,
+      rejectSujet,
+      visible,
+      showModal,
+      handleOk,
+      activeSujet,
+      comment,
     }
   },
 })

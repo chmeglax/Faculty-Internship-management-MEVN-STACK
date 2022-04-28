@@ -8,6 +8,8 @@ const SpecialtySchema = require('./specialtyModal')
 const OrganismeSchema = require('./organismeModal')
 const SujetSchema = require('./sujetModal')
 const ValidationSchema = require('./validationModal')
+const SessionSchema = require('./sessionModal')
+const SoutenanceSchema = require('./soutenanceModal')
 
 module.exports = {
 
@@ -18,6 +20,8 @@ module.exports = {
     OrganismeModal: Root.model("organisme", OrganismeSchema),
     SujetModal: Root.model("sujet", SujetSchema),
     ValidationModal: Root.model("validation", ValidationSchema),
+    SessionModal: Root.model("session", SessionSchema),
+    SoutenanceModal: Root.model("soutenance", SoutenanceSchema),
 
 
 }
