@@ -108,20 +108,85 @@
       @ok="handleOk"
     >
       <a-form :model="formState" name="basic">
-        <a-form-item
-          label="Username"
-          name="username"
-          :rules="[{ required: true, message: 'Please input your username!' }]"
-        >
-          <a-input v-model:value="formState.username" />
+        <a-form-item label="Code" name="code">
+          <a-input v-model:value="formState.code" />
         </a-form-item>
-
-        <a-form-item
-          label="Password"
-          name="password"
-          :rules="[{ required: true, message: 'Please input your password!' }]"
-        >
-          <a-input-password v-model:value="formState.password" />
+        <a-form-item label="Salle" name="salle">
+          <a-input v-model:value="formState.salle" />
+        </a-form-item>
+        <a-form-item label="session" name="session">
+          <a-select
+            v-model:value="formState.session"
+            show-search
+            placeholder="Chosir les spécialités du sujet !"
+          >
+            <a-select-option
+              v-for="session in sessionsData"
+              :key="session._id"
+              :value="session._id"
+            >
+              {{ session.code }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="date de soutenance" name="timestamp">
+          <a-date-picker
+            v-model:value="formState.timestamp"
+            format="DD-MM-YYYY HH:mm:ss"
+            :disabled-date="disabledDate"
+            :show-time="{ defaultValue: dayjs('8:30:00', 'HH:mm:ss') }"
+          />
+        </a-form-item>
+        <a-form-item label="Président" name="president">
+          <a-select
+            v-model:value="formState.jury.president"
+            show-search
+            placeholder="Chosir le président du jury!"
+            @change="handleChange"
+          >
+            <a-select-option
+              v-for="t in teachersData"
+              :key="t._id"
+              :value="t._id"
+              :disabled="t.disabled"
+            >
+              {{ t.lName + ' ' + t.fName }}
+            </a-select-option></a-select
+          >
+        </a-form-item>
+        <a-form-item label="rapporteur" name="rapporteur">
+          <a-select
+            v-model:value="formState.jury.rapporteur"
+            show-search
+            placeholder="Chosir le rapporteur !"
+            @change="handleChange"
+          >
+            <a-select-option
+              v-for="t in teachersData"
+              :key="t._id"
+              :value="t._id"
+              :disabled="t.disabled"
+            >
+              {{ t.lName + ' ' + t.fName }}
+            </a-select-option></a-select
+          >
+        </a-form-item>
+        <a-form-item label="encadrant" name="encadrant">
+          <a-select
+            v-model:value="formState.jury.encadrant"
+            show-search
+            placeholder="Chosir l'encadrant !"
+            @change="handleChange"
+          >
+            <a-select-option
+              v-for="t in teachersData"
+              :key="t._id"
+              :value="t._id"
+              :disabled="t.disabled"
+            >
+              {{ t.lName + ' ' + t.fName }}
+            </a-select-option></a-select
+          >
         </a-form-item>
       </a-form>
     </a-modal>
@@ -134,7 +199,7 @@ import VbHeadersCardHeader from '@/@vb/widgets/Headers/CardHeader'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
-
+import dayjs from 'dayjs'
 import { SearchOutlined } from '@ant-design/icons-vue'
 import { defineComponent, reactive, ref, computed } from 'vue'
 import ApiClient from '@/services/axios'
@@ -261,10 +326,33 @@ export default defineComponent({
     })
     const tableLoading = ref(true)
     const dataSource = ref([])
+    const sessionsData = ref([])
+    const teachersData = ref([])
 
+    const getSelectData = () => {
+      ApiClient.post('/admin/session/filter', {
+        query: {},
+      })
+        .then((res) => {
+          sessionsData.value = res.data
+        })
+        .catch((e) => {
+          message.error('Veuillez refraichir la page ! ')
+        })
+      ApiClient.post('/admin/teacher', {
+        query: {},
+      })
+        .then((res) => {
+          teachersData.value = res.data
+        })
+        .catch((e) => {
+          message.error('Veuillez refraichir la page ! ')
+        })
+    }
+    getSelectData()
     //get organismes
     ApiClient.post('/student/sujet/filter', {
-      query: { validated: true },
+      query: { validated: true, soutenance: false },
     })
       .then((res) => {
         dataSource.value = res.data
@@ -287,48 +375,56 @@ export default defineComponent({
       clearFilters()
       state.searchText = ''
     }
-    const rejectSujet = (record) => {
-      console.log(record)
-      const updateData = { validated: !record.validated }
-
-      ApiClient.patch('/student/sujet/' + record._id, { data: updateData })
-        .then(() => {
-          dataSource.value = dataSource.value.map((elem) =>
-            elem._id == record._id ? { ...elem, validated: !record.validated } : elem,
-          )
-          message.success(`Sujet modifié`)
-        })
-        .catch((e) => {
-          message.warning('Impossible de modifier le sujet pour cet utilisateur')
-        })
-    }
 
     //modal
     const visible = ref(false)
     const activeSujet = ref({})
     const formState = reactive({
-      username: '',
-      password: '',
-      remember: true,
+      code: '',
+      session: '',
+      salle: '',
+      sujet: '',
+      timestamp: '',
+      jury: {
+        rapporteur: '',
+        president: '',
+        encadrant: '',
+      },
     })
     const showModal = (record) => {
       activeSujet.value = record
+      console.log(record)
       visible.value = true
     }
 
     const handleOk = (e) => {
-      console.log(formState.value)
+      formState.sujet = activeSujet.value._id
+      console.log(formState)
       console.log('activeSujet', activeSujet.value)
-      /*ApiClient.patch('/admin/validation/' + activeSujet.value._id, { teachers: targetKeys.value })
+      ApiClient.put('/admin/soutenance/', formState)
         .then(() => {
-          message.success(`Enseignatn affecteés`)
+          message.success(`Soutenance plannifié avec succées`)
         })
         .catch((e) => {
-          message.warning("Impossible d'affecter des enseignants")
+          console.log(e.response.data.message)
+          message.error(e.response.data.message)
         })
-        .finally(() => (visible.value = false))*/
+        .finally(() => (visible.value = false))
     }
+    const handleChange = (selected) => {
+      console.log(selected)
+      teachersData.value = teachersData.value.map((elem) => {
+        if (elem._id === selected) elem.disabled = true
 
+        return elem
+      })
+      console.log('elem', teachersData.value)
+    }
+    //datepicker
+    const disabledDate = (current) => {
+      // Can not select days before today and today
+      return current && current < dayjs().endOf('day')
+    }
     return {
       apiUrl,
       columns,
@@ -340,12 +436,16 @@ export default defineComponent({
       dataSource,
       tableLoading,
       router,
-      rejectSujet,
       visible,
       showModal,
       handleOk,
       activeSujet,
       formState,
+      sessionsData,
+      teachersData,
+      disabledDate,
+      dayjs,
+      handleChange,
     }
   },
 })

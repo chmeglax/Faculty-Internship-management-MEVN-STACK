@@ -77,10 +77,21 @@ export const getMenuData = [
     icon: 'fe fe-calendar',
   },
   {
-    title: 'Planifier les soutenance',
-    key: 'sujedtA',
-    url: '/admin/soutenance',
+    title: 'Les soutenance',
     icon: 'fe fe-book-open',
+    children: [
+      {
+        title: 'Planifier les soutenance',
+        key: 'iadsepr',
+        url: '/admin/soutenance',
+      },
+
+      {
+        title: 'Visualiser vos plannification',
+        key: 'oi2idv',
+        url: '/admin/soutenance/planned',
+      },
+    ],
   },
 
 

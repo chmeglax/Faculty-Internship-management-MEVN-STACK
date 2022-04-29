@@ -16,14 +16,24 @@ module.exports = {
         try {
             const data = req.body
             console.log(data)
-            let errors = 0
-            const toValidate = await ValidationModal.find({ teacher: idTeacher }).distinct('sujet');
-            console.log(toValidate)
-            SujetModal.find({ _id: { $in: toValidate } }, function (err, docs) {
-                if (!err)
-                    res.json(docs)
-                else res.status(408).json({ error: err })
+            const count = await SoutenanceModal.countDocuments({
+                timestamp: data.timestamp,
+                $or: [{ "jury.rapporteur": data.jury.rapporteur },
+                { "jury.president": data.jury.president },
+                { "jury.encadrant": data.jury.encadrant }]
             });
+
+            if (count > 0) {
+                res.status(409).json({ message: "l'un des jury n'est pas disponible a cette horaire" });
+            } else {
+                const newSoutenance = new SoutenanceModal(data);
+                newSoutenance.save().then((soutenance, err) => {
+                    if (err) return res.status(422).json(err);
+                    SujetModal.updateOne({ _id: data.sujet }, { soutenance: true }).exec()
+                    return res.json(soutenance);
+                });
+            }
+
         }
         catch (e) {
             console.log(e)

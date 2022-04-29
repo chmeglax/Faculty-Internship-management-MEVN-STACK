@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 const SoutenanceSchema = new Schema({
-    _id: { type: Schema.Types.ObjectId },
+    _id: { type: Schema.Types.ObjectId, auto: true },
     code: { type: String },
     //Pour chaque PFE qui sera soutenu dans cette session, on fixe la date, l’heure et la salle et on affecte un jury qui est composé d’un président et d’un rapporteur en plus de l’enseignant encadrant et l’encadrant dans l’entreprise d’accueil
     timestamp: { type: Date },
@@ -31,6 +31,11 @@ const SoutenanceSchema = new Schema({
     session: {
         type: Schema.Types.ObjectId,
         ref: "session",
+        autopopulate: true,
+    },
+    sujet: {
+        type: Schema.Types.ObjectId,
+        ref: "sujet",
         autopopulate: true,
     },
 });

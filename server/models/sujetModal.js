@@ -33,6 +33,10 @@ const SujetSchema = new Schema({
         type: Boolean,
         default: false,
     },
+    soutenance: {
+        type: Boolean,
+        default: false,
+    },
     //if sujet is validated it becomes locked
     locked: {
         type: Boolean,

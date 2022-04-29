@@ -28,7 +28,7 @@ router.patch(
     CRUD.resultHundler
 );
 router.post(
-    "/",
+    "/filter",
     CRUD.filter,
     CRUD.resultHundler
 );

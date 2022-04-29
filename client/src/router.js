@@ -51,9 +51,13 @@ const router = createRouter({
         {
           path: '/admin/soutenance',
           meta: { title: 'planification soutenance' },
-          component: () => import('./views/serviceStage/planifSoutenance'),
+          component: () => import('./views/serviceStage/soutenance/notPlanned'),
         },
-
+        {
+          path: '/admin/soutenance/planned',
+          meta: { title: 'Liste des soutenance plannifé' },
+          component: () => import('./views/serviceStage/soutenance/planned'),
+        },
         // VB:REPLACE-END:ROUTER-CONFIG
       ],
     },
