@@ -6,8 +6,14 @@ const SujetSchema = new Schema({
     code: { type: Number, required: true },
     name: { type: String, required: true },
     desc: { type: String, required: true },
+    section: { type: String },
     organisme: {
         type: String, required: true
+    },
+    encadrantP: {
+        type: Schema.Types.ObjectId,
+        ref: "teacher",
+        autopopulate: true,
     },
     encadrantS: {
         name: { type: String, required: false },

@@ -87,6 +87,11 @@ const router = createRouter({
           meta: { title: 'Ajouter une proposition' },
           component: () => import('./views/student/proposition/addProposition'),
         },
+        {
+          path: '/student/soutenance',
+          meta: { title: 'Consulter vos soutenance' },
+          component: () => import('./views/student/soutenance'),
+        },
         // VB:REPLACE-END:ROUTER-CONFIG
       ],
     },

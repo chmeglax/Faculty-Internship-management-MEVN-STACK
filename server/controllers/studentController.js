@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const passport = require("passport");
-const { StudentModal } = require('@models')
 const Joi = require("joi");
+const { StudentModal, SoutenanceModal, SujetModal } = require('@models')
 
 const validator = {
   email: Joi.string().email().required(),
@@ -80,8 +80,42 @@ module.exports = {
     }
 
 
-  }
+  },
+  getSoutenance: async (req, res, next) => {
+    try {
+      const studentId = req.params.idStudent
 
+
+      SujetModal.findOne({ students: studentId })
+        .exec()
+        .then((s, err) => {
+          if (err) {
+            // checking existence of the user
+            return res.status(409).json({
+              error: err,
+            });
+          } else {
+            console.log("sujet : ", s)
+            SoutenanceModal.findOne({ sujet: s._id })
+              .exec()
+              .then((doc, err) => {
+                if (err) return res.status(409).json({
+                  error: err,
+                });
+                res.json(doc)
+              })
+          }
+        })
+    }
+    catch (e) {
+      console.log(e)
+      res.status(422).json({
+        message: e.stack
+      })
+    }
+
+
+  }
 }
 
 

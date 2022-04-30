@@ -304,6 +304,25 @@ export default defineComponent({
           }
         },
       },
+      /* {
+        title: 'Section',
+        dataIndex: 'section',
+        key: 'section',
+        slots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'sujet',
+        },
+        onFilter: (value, record) =>
+          record.sujet.code.toString().toLowerCase().includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: (visible) => {
+          if (visible) {
+            setTimeout(() => {
+              searchInput.value.focus()
+            }, 0)
+          }
+        },
+      },*/
       {
         title: 'date',
         dataIndex: 'timestamp',

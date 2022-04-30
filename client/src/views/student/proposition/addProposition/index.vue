@@ -93,6 +93,25 @@
                       </a-select-option></a-select
                     >
                   </a-form-item>
+                </a-col> </a-row
+              ><a-row :gutter="16">
+                <a-col :span="24">
+                  <a-form-item label="Encadrant pédagogique" name="encadrantP">
+                    <a-select
+                      v-model:value="form.encadrantP"
+                      show-search
+                      placeholder="Chosir l'encadrant pédagogique !"
+                    >
+                      <a-select-option
+                        v-for="t in teachersData"
+                        :key="t._id"
+                        :value="t._id"
+                        :disabled="t.disabled"
+                      >
+                        {{ t.lName + ' ' + t.fName }}
+                      </a-select-option></a-select
+                    >
+                  </a-form-item>
                 </a-col>
               </a-row>
               <a-row :gutter="16">
@@ -106,6 +125,7 @@
                   </a-form-item>
                 </a-col>
               </a-row>
+
               <a-divider>Societé</a-divider>
               <a-row :gutter="16">
                 <a-col :span="24">
@@ -268,6 +288,7 @@ export default defineComponent({
       section: '',
       binome: false,
       type: 'PFE',
+      encadrantP: '',
       encadrantS: {
         name: '',
         job: '',
@@ -295,7 +316,17 @@ export default defineComponent({
       .catch((e) => {
         message.error('Veuillez refraichir la page ! ')
       })
-
+    //get list encadrant
+    const teachersData = ref([])
+    ApiClient.post('/admin/teacher', {
+      query: {},
+    })
+      .then((res) => {
+        teachersData.value = res.data
+      })
+      .catch((e) => {
+        message.error('Veuillez refraichir la page ! ')
+      })
     const handleFinish = (values) => {
       console.log(binome.value)
       if (binome.value && !binomeData.value._id) {
@@ -321,6 +352,7 @@ export default defineComponent({
         formData.append('files', sujetDoc.value)
         console.log('sujetDoc.value', sujetDoc.value)
       }
+
       // Display the key/value pairs
       for (var pair of formData.entries()) {
         console.log(pair[0] + ': ' + pair[1])
@@ -416,6 +448,7 @@ export default defineComponent({
       binome,
       loadBinome,
       binomeData,
+      teachersData,
     }
   },
 })

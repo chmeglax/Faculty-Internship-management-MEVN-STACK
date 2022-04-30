@@ -115,5 +115,11 @@ export const getMenuStudentData = [
     url: '/student/organismes',
     icon: 'fe fe-database',
   },
+  {
+    title: 'Soutenance',
+    key: 'Soutenance',
+    url: '/student/soutenance',
+    icon: 'fe fe-calendar',
+  },
 
 ]

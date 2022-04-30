@@ -350,20 +350,22 @@ export default defineComponent({
         })
     }
     getSelectData()
-    //get organismes
-    ApiClient.post('/student/sujet/filter', {
-      query: { validated: true, soutenance: false },
-    })
-      .then((res) => {
-        dataSource.value = res.data
+    //get sujet
+    const getSujet = () => {
+      ApiClient.post('/student/sujet/filter', {
+        query: { validated: true, soutenance: false },
       })
-      .catch((e) => {
-        message.error('Veuillez refraichir la page ! ')
-      })
-      .finally(() => {
-        tableLoading.value = false
-      })
-
+        .then((res) => {
+          dataSource.value = res.data
+        })
+        .catch((e) => {
+          message.error('Veuillez refraichir la page ! ')
+        })
+        .finally(() => {
+          tableLoading.value = false
+        })
+    }
+    getSujet()
     const handleSearch = (selectedKeys, confirm, dataIndex) => {
       confirm()
       console.log(selectedKeys[0])
@@ -404,6 +406,7 @@ export default defineComponent({
       ApiClient.put('/admin/soutenance/', formState)
         .then(() => {
           message.success(`Soutenance plannifié avec succées`)
+          dataSource.value = dataSource.value.filter((e) => e._id !== activeSujet.value._id)
         })
         .catch((e) => {
           console.log(e.response.data.message)

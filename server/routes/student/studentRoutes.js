@@ -35,5 +35,8 @@ router.post(
     CRUD.resultHundler
 );
 
-
+router.get(
+    "/soutenance/:idStudent",
+    studentController.getSoutenance
+);
 module.exports = router;

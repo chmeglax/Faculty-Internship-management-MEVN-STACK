@@ -19,6 +19,7 @@ app.use("/sujet",
             name: Joi.string().required(),
             desc: Joi.string(),
             encadrantS: Joi.any(),
+            encadrantP: Joi.any(),
             specialites: Joi.any(),
             files: Joi.any(),
             binome: Joi.any(),
@@ -32,4 +33,5 @@ app.use("/sujet",
         next()
     },
     sujetRoutes)
+
 module.exports = app

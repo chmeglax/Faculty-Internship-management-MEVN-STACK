@@ -8,6 +8,8 @@ router.put("/", upload.array('files', 1),
     async (req, res, next) => {
         const code = await SujetModal.countDocuments({});
         req.body.code = code + 1
+        req.body.encadrantS = JSON.parse(req.body.encadrantS)
+        console.log("here:", req.body)
         next();
     },
     CRUD.create,
