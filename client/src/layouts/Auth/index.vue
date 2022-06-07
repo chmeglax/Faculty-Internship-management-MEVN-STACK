@@ -1,7 +1,6 @@
 <template>
   <a-layout class="vb__layout">
     <a-layout-content>
-      <vb-sidebar />
       <div
         :class="{
           [$style.container]: true,
@@ -12,10 +11,7 @@
           [$style.gray]: settings.authPagesColor === 'gray',
         }"
         :style="{
-          backgroundImage:
-            settings.authPagesColor === 'image'
-              ? `url(resources/images/content/photos/8.jpeg)`
-              : 'none',
+          backgroundImage: `url(resources/images/content/photos/8.jpeg)`,
         }"
       >
         <div
@@ -51,12 +47,9 @@
 
 <script>
 import { mapState } from 'vuex'
-import VbSidebar from '@/@vb/components/Sidebar'
-import VbSupportChat from '@/@vb/components/SupportChat'
 
 export default {
   name: 'AuthLayout',
-  components: { VbSidebar, VbSupportChat },
   computed: mapState(['settings']),
 }
 </script>

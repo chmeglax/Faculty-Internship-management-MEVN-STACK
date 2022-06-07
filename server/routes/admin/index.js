@@ -78,4 +78,22 @@ app.use("/soutenance",
         next()
     },
     soutenanceRoutes)
+
+app.use("/mark",
+    passport.authenticate('jwt', { session: false }),
+    (req, res, next) => {
+        console.log("req.user:", req.user)
+        if (req.body.data)
+            req.body.data.user = req.user._id.toString()
+        res.locals.modelName = "MarkModal";
+        res.locals.validator = {
+            note: Joi.number().required(),
+            user: Joi.string().required(),
+            soutenance: Joi.string().required(),
+            comment: Joi.string(),
+
+        }
+        next()
+    },
+    CRUDRoutes)
 module.exports = app

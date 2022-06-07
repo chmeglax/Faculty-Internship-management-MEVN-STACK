@@ -60,6 +60,12 @@ export const getMenuData = [
     icon: 'fe fe-book-open',
   },
   {
+    title: 'Mes soutenances',
+    key: 'soutenanceM',
+    url: '/admin/messoutenances',
+    icon: 'fe fe-book-open',
+  },
+  {
     category: true,
     title: 'Service de stage',
     key: 'q7r3gdhr',

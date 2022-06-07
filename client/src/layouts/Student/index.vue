@@ -15,8 +15,7 @@
       }"
     >
       <vb-variants />
-      <vb-sidebar />
-      <vb-support-chat />
+
       <menu-student />
       <a-layout>
         <a-layout-header
@@ -60,8 +59,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import VbTopbar from '@/@vb/components/TopbarStudent'
-import VbSidebar from '@/@vb/components/Sidebar'
-import VbSupportChat from '@/@vb/components/SupportChat'
 import VbVariants from '@/@vb/components/Variants'
 import MenuStudent from '@/components/MenuStudent'
 import VbBreadcrumbs from '@/@vb/components/Breadcrumbs'
@@ -76,8 +73,6 @@ export default {
   components: {
     MenuStudent,
     VbTopbar,
-    VbSidebar,
-    VbSupportChat,
     VbVariants,
     VbBreadcrumbs,
     VbBreadcrumbs2,

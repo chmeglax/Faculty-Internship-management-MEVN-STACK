@@ -39,4 +39,8 @@ router.get(
     "/soutenance/:idStudent",
     studentController.getSoutenance
 );
+router.get(
+    "/soutenance/note/:idSoutenance",
+    studentController.getNote
+);
 module.exports = router;

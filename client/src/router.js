@@ -49,6 +49,12 @@ const router = createRouter({
           component: () => import('./views/teachers/sujetAffecte'),
         },
         {
+          path: '/admin/messoutenances',
+          meta: { title: 'Mes soutenances' },
+          component: () => import('./views/teachers/mesSoutenances'),
+        },
+
+        {
           path: '/admin/soutenance',
           meta: { title: 'planification soutenance' },
           component: () => import('./views/serviceStage/soutenance/notPlanned'),

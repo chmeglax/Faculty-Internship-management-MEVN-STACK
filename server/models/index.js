@@ -10,6 +10,7 @@ const SujetSchema = require('./sujetModal')
 const ValidationSchema = require('./validationModal')
 const SessionSchema = require('./sessionModal')
 const SoutenanceSchema = require('./soutenanceModal')
+const MarkSchema = require('./markModal')
 
 module.exports = {
 
@@ -22,6 +23,7 @@ module.exports = {
     ValidationModal: Root.model("validation", ValidationSchema),
     SessionModal: Root.model("session", SessionSchema),
     SoutenanceModal: Root.model("soutenance", SoutenanceSchema),
+    MarkModal: Root.model("mark", MarkSchema),
 
 
 }

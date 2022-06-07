@@ -15,8 +15,6 @@
       }"
     >
       <vb-variants />
-      <vb-sidebar />
-      <vb-support-chat />
       <vb-menu-classic v-if="settings.layoutMenu === 'classic'" />
       <vb-menu-flyout v-if="settings.layoutMenu === 'flyout'" />
       <vb-menu-simply v-if="settings.layoutMenu === 'simply'" />
@@ -62,8 +60,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { useStore } from 'vuex'
 import VbTopbar from '@/@vb/components/Topbar'
-import VbSidebar from '@/@vb/components/Sidebar'
-import VbSupportChat from '@/@vb/components/SupportChat'
 import VbVariants from '@/@vb/components/Variants'
 import VbMenuClassic from '@/@vb/components/MenuClassic'
 import VbMenuFlyout from '@/@vb/components/MenuFlyout'
@@ -82,8 +78,6 @@ export default {
     VbMenuFlyout,
     VbMenuSimply,
     VbTopbar,
-    VbSidebar,
-    VbSupportChat,
     VbVariants,
     VbBreadcrumbs,
     VbBreadcrumbs2,
@@ -159,12 +153,12 @@ export default {
     // mobile slide bindings
     const bindMobileSlide = () => {
       // mobile menu touch slide opener
-      const unify = e => {
+      const unify = (e) => {
         return e.changedTouches ? e.changedTouches[0] : e
       }
       document.addEventListener(
         'touchstart',
-        e => {
+        (e) => {
           const x = unify(e).clientX
           touchStartPrev.value = x
           touchStartLocked.value = x > 70
@@ -173,7 +167,7 @@ export default {
       )
       document.addEventListener(
         'touchmove',
-        e => {
+        (e) => {
           const x = unify(e).clientX
           const prev = touchStartPrev.value
           if (x - prev > 50 && !touchStartLocked.value) {

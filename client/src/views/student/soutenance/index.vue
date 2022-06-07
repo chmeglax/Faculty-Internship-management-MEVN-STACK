@@ -63,11 +63,14 @@
                 <a-descriptions-item label="Date" :span="2">{{
                   moment(soutenanceData.timestamp).format('DD-MM-YYYY HH:mm') || '--'
                 }}</a-descriptions-item>
-                <a-descriptions-item label="Status">
+                <a-descriptions-item label="Status" :span="4">
                   <a-badge
                     status="processing"
                     :text="moment(soutenanceData.timestamp).locale('fr').fromNow() || '--'"
                   />
+                </a-descriptions-item>
+                <a-descriptions-item label="Note">
+                  {{ note }}
                 </a-descriptions-item>
               </a-descriptions>
             </div>
@@ -107,12 +110,24 @@ export default {
   },
   setup() {
     const soutenanceData = ref(undefined)
+    const note = ref('--')
     const store = useStore()
     const user = computed(() => store.getters['user/user'])
     const loading = ref(true)
     ApiClient.get('/student/soutenance/' + user.value._id)
       .then((res) => {
         soutenanceData.value = res.data
+        ApiClient.get('/student/soutenance/note/' + soutenanceData.value._id).then((res) => {
+          console.log(res.data)
+          if (res.data.length > 0) {
+            let _note = 0
+            res.data.forEach((element) => {
+              _note += element.note
+            })
+            note.value = _note / res.data.length
+            note.value = note.value.toFixed(2)
+          }
+        })
       })
       .catch((e) => {
         message.error('Veuillez refraichir la page ! ')
@@ -123,6 +138,7 @@ export default {
       soutenanceData,
       moment,
       loading,
+      note,
     }
   },
 }
